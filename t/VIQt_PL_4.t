@@ -2,7 +2,7 @@
 
 use lib './blib/lib';
 use strict;
-use constant DEBUG => 0;
+use constant DEBUG => 1;
 
 BEGIN {
     # to handle systems with no installed Test module

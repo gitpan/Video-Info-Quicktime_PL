@@ -5,7 +5,7 @@ use Video::Info;
 
 use base qw(Video::Info);
 
-our $VERSION = '0.05';
+our $VERSION = '0.07';
 use constant DEBUG => 0;
 
 use Compress::Zlib;
@@ -52,30 +52,29 @@ sub probe {
     my($len, $sig) = unpack("Na4", my_read($self->handle, 8));
     
     my %pnot;
-    if ($sig =~ m/pnot$/) {
-        # optional preview data is present... go ahead and process it.
-        my $prevue_atom = my_read( $self->handle, $len-8 );
-        
-        # print map{" $_ => $pnot{$_}\n" } sort keys %pnot;
-        ($len, $sig) = unpack("Na4", my_read($self->handle, 8));
-        if ($sig eq 'PICT') {
-            $self->pict(my_read( $self->handle, $len-8 ));
-            
-            ### Test preview during debug by outputing here:
-            # open(O,">out.pict");
-            # print O "\x00" x 512;
-            # print O $self->pict;
-            # close(O);
-            
+    while ( ($sig !~ /moov$/) and (!eof($self->handle)) ) {
+        if ($sig =~ m/pnot$/) {
+            # optional preview data is present... go ahead and process it.
+            my $prevue_atom = my_read( $self->handle, $len-8 );
+
+            # print map{" $_ => $pnot{$_}\n" } sort keys %pnot;
+            ($len, $sig) = unpack("Na4", my_read($self->handle, 8));
+            if ($sig eq 'PICT') {
+                $self->pict(my_read( $self->handle, $len-8 ));
+                
+                ### Test preview during debug by outputing here:
+                # open(O,">out.pict");
+                # print O "\x00" x 512;
+                # print O $self->pict;
+                # close(O);
+            }
             $len=8;
         }
-        while ( ($sig !~ /moov$/) and (!eof($self->handle)) ) {
-            seek( $self->handle, $len-8, 1 );
-            ($len, $sig) = unpack("Na4", my_read($self->handle, 8));
-            print "".($len-8)."\t".$sig."\n" if DEBUG;
-        }
+        seek( $self->handle, $len-8, 1 );
+        ($len, $sig) = unpack("Na4", my_read($self->handle, 8));
+        print "".($len-8)."\t".$sig."\n" if DEBUG;
     }
-    die "Bad MOV signature" unless ( $sig =~ m/moov$/ );
+    die "Unable to find 'moov' MOV signature.' " unless ( $sig =~ m/moov$/ );
     
     # $self->date($self->time_to_date(unpack('Na4', substr($prevue_atom,0,4,''))));
     # $self->version(hex( substr($prevue_atom,0,2,'') ));

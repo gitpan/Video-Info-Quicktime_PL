@@ -24,7 +24,7 @@ Digest::MD5 (only for the test scripts)
 COMMENTS
 
 This module is intended to extend the functionality of the Video::Info
-module by Allen Day.  In contrast with Video::Info:Quicktime, this is
+module by Allen Day.  In contrast with Video::Info::Quicktime, this is
 a pure perl implementation -- so the OpenQuicktime library is not
 needed.  This gives the information extraction functionality to any OS
 that runs perl, as well as avoiding additional module dependencies to
