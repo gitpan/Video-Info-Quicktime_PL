@@ -34,7 +34,7 @@ ok( int($file->fps) , 10 );
 ok( $file->vcodec   , 'jpeg' );   
 ok( $file->scale    , 0 );        
 ok( $file->vrate    , 0 );        
-ok( $file->vstreams , 0 );        
+ok( $file->vstreams , 1 );        
 ok( $file->vframes  , 21 );            
 ok( $file->width    , 160 );      
 ok( $file->height   , 120 );      

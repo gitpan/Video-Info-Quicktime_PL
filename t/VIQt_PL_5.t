@@ -13,7 +13,7 @@ BEGIN {
 	use lib 't';
     }
     use Test;
-    plan tests => 18 }
+    plan tests => 19 }
 
 print "Loading Video::Info::Quicktime_PL...\n";
 use Video::Info::Quicktime_PL;
@@ -22,21 +22,21 @@ ok(1);
 my $file = Video::Info::Quicktime_PL->new(-file=>'eg/sample5.mov'); # p8241014.mov');
 ok $file;
 ok $file->probe;
-ok $file->achans       == 2;
-ok $file->arate        == 22050;
-ok $file->astreams     == 0;
-ok int($file->fps)     == 12;
-ok $file->height       == 240;
-ok $file->scale        == 0;
-ok $file->type         eq 'moov';
-ok $file->vcodec       eq 'SVQ1';
-ok $file->vframes      == 60;
-ok $file->vrate        == 0;
-ok $file->vstreams     == 0;
-ok $file->width        == 190;
-ok int($file->duration)== 5;
+ok( $file->achans   , 2 );
+ok( $file->arate    , 22050 );
+ok( $file->astreams , 1 );
+ok( int($file->fps) , 12 );
+ok( $file->height   , 240 );
+ok( $file->scale    , 0 );
+ok( $file->type     , 'moov' );
+ok( $file->vcodec   , 'SVQ1' );
+ok( $file->vframes  , 60 );
+ok( $file->vrate    , 0 );
+ok( $file->vstreams , 1 );
+ok( $file->width    , 190 );
+ok( int($file->duration), 5 );
 # ok $file->acodecraw    eq '';
-# ok $file->acodec       eq '';
+ok($file->acodec,'QDM2');
 ok($file->title,"QuickTime Sample Movie");
 ok($file->copyright,"© Apple Computer, Inc. 2001");
 
@@ -55,7 +55,7 @@ print 'vstreams '    .$file->vstreams     ."\n";
 print 'width    '    .$file->width        ."\n";
 print 'duration '    .$file->duration     ."\n";
 # print 'acodecraw'    .$file->acodecraw    ."\n";
-# print 'acodec   '    .$file->acodec       ."\n";
+print 'acodec   '    .$file->acodec       ."\n";
 print 'title    '    .$file->title        ."\n";
 print 'copyright'    .$file->copyright    ."\n";
 } if DEBUG;

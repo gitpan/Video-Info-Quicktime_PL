@@ -5,13 +5,13 @@ use Video::Info;
 
 use base qw(Video::Info);
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 use constant DEBUG => 0;
 
 use Compress::Zlib;
 
 use Class::MakeMethods::Emulator::MethodMaker
-    get_set => [ qw( version rsrc_id pict raw_headers )],
+    get_set => [ qw( version rsrc_id pict acodec raw_headers )],
     ;
 
 
@@ -119,6 +119,7 @@ sub process_mov_atom {
                 # open(O,">cmov"); print O $dest; close(O);
                 # print "== recursive call to parse mov header ==\n";
                 $self->process_mov_atom( construct_hash( $dest ) );
+                return;
             }
         } elsif ($key eq 'mvhd') { 
             my(%h);
@@ -152,6 +153,9 @@ sub process_mov_atom {
                 if ( exists $minf{'vmhd'} ) {
                     $self->width($tkhd{'Track width'});
                     $self->height($tkhd{'Track height'});
+
+                    my $tmp = $self->vstreams + 1;
+                    $self->vstreams( $tmp );
                     
                     my %stbl = construct_hash( $minf{'stbl'} );
                     my %stsd = get_stsd( $stbl{'stsd'} ); 
@@ -161,7 +165,7 @@ sub process_mov_atom {
 
                     # print map {" $_ = $stts{$_}\n"} keys %stts;
                     
-                    $self->vcodec( $stsd{'compression_type'} );
+                    $self->vcodec( $stsd{'compression type'} );
                     
                 }
                 if ( exists $minf{'smhd'} ) {
@@ -171,15 +175,20 @@ sub process_mov_atom {
                     my %stsd = get_stsd( $stbl{'stsd'} );
                     # print map {" $_=$stsd{$_}\n"} keys %stsd;
                     
+                    my $tmp = $self->astreams + 1;
+                    $self->astreams( $tmp );
+
                     $self->arate($stsd{'audio sample rate'});
                     $self->afrequency($stsd{'audio sample size'});
                     $self->achans($stsd{'audio channels'});
+                    $self->acodec($stsd{'compression type'});
                 }
             }
         }
     }
-    $self->vframes( $cnt ) if ($cnt ne 0);
+    $self->vframes( $cnt );
     $self->fps( $cnt / $self->duration );
+
 }
 
 sub construct_hash {
@@ -221,7 +230,7 @@ sub get_stsd {
     $h{'Version'}          = unpack( "n2", substr($cntnt,0,2,'') );	
     $h{'Flags'}            = unpack("H*", substr($cntnt,0,6,'') );	
     my $len = unpack("Na",substr($cntnt,0,4,''));
-    ($h{'compression_type'} = substr($cntnt,0,8,'')) =~ s/\W(.*?)\W/$1/g;
+    ($h{'compression type'} = substr($cntnt,0,8,'')) =~ s/\W(.*?)\W/$1/g;
     $h{'Version'}           = unpack( "n2", substr($cntnt,0,2,'') );
     $h{'Revision_level'}    = unpack( "n2", substr($cntnt,0,2,'') );
     ($h{'Vendor'}           = unpack("a8",substr($cntnt,0,8,'')))=~s/\W//g;
@@ -320,6 +329,7 @@ Video::Info::Quicktime_PL - pure Perl implementation to extract header info from
     use Video::Info::Quicktime;
 
     my $file = Video::Info::Quicktime_PL->new(-file=>'eg/rot_button.mov');
+    $file->probe;
     printf("frame size: %d x %d\n", $file->width, $file->height );
     printf("fps: %d, total length: %d (sec)\n", $file->fps, $file->duration );
 
@@ -331,7 +341,7 @@ Video::Info::Quicktime_PL - pure Perl implementation to extract header info from
         print "Outputing PICT file\n";
         my $oi = 'eg/mov_preview.pict';
         open(O,">$oi") || warn("Couldn't open $oi: $!\n");
-        
+        binmode(O);  # set the file to binary mode in working on Windows
         # Image::Magick methods will only recognize this file as 
         # PICT if there exists a leading header of zeros:
         print O "\x00" x 512;

@@ -3,7 +3,7 @@
 use lib './blib/lib';
 use lib '.';
 use strict;
-use constant DEBUG => 1;
+use constant DEBUG => 0;
 
 BEGIN {
     # to handle systems with no installed Test module
@@ -35,7 +35,7 @@ ok( int($file->fps) , 15 );
 ok( $file->vcodec   , 'jpeg' );   
 ok( $file->scale    , 0 );        
 ok( $file->vrate    , 0 );        
-ok( $file->vstreams , 0 );        
+ok( $file->vstreams , 1 );        
 ok( $file->vframes  , 83 );            
 ok( $file->width    , 320 );      
 ok( $file->height   , 240 );      
@@ -50,7 +50,7 @@ ok( md5_base64($file->pict), 'xomFZwnON6waoaaVTNbp5Q' );
 #     print "Outputing PICT file\n";
 #     my $oi = 'eg/mov_preview.pict';
 #     open(O,">$oi") || warn("Couldn't open $oi: $!\n");
-#     
+#     binmode(O);
 #     # Image::Magick methods will only recognize this file as 
 #     # PICT if there exists a leading header of zeros:
 #     print O "\x00" x 512;
